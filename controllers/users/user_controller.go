@@ -1,18 +1,22 @@
 package users
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mojoboss/bookstore_users-api/domain/users"
 	"github.com/mojoboss/bookstore_users-api/services"
+	"github.com/mojoboss/bookstore_users-api/utils/errors"
 	"net/http"
 )
 
 func CreateUser(c *gin.Context) {
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		fmt.Println(err)
-		//TODO:HANDLE ERROR return bad request
+		restErr := errors.RestErr{
+			Message: "invalid json body",
+			Status:  http.StatusBadRequest,
+			Error:   "bad request",
+		}
+		c.JSON(restErr.Status, restErr)
 		return
 	}
 	result, saveErr := services.CreateUser(user)
@@ -20,7 +24,6 @@ func CreateUser(c *gin.Context) {
 		//TODO: HANDLE THIS user creation error
 		return
 	}
-	fmt.Println(user)
 	c.JSON(http.StatusCreated, result)
 }
 
