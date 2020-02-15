@@ -26,7 +26,7 @@ func (user *User) Save() *errors.RestErr {
 	current := userDB[user.Id]
 	if current != nil {
 		if current.Email == user.Email {
-			return errors.NewBadRequestError(fmt.Sprintf("email %s already registered", user))
+			return errors.NewBadRequestError(fmt.Sprintf("email %s already registered", user.Email))
 		}
 		return errors.NewBadRequestError(fmt.Sprintf("user %d already exists", user.Id))
 	}
