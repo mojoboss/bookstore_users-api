@@ -9,7 +9,7 @@ var (
 	userDB = make(map[int64]*User)
 )
 
-func (user *User) Get(userId int64) *errors.RestErr {
+func (user *User) Get() *errors.RestErr {
 	result := userDB[user.Id]
 	if result == nil {
 		return errors.NewNotFoundError(fmt.Sprintf("user &d not found", user.Id))
