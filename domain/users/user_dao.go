@@ -3,8 +3,8 @@ package users
 import (
 	"fmt"
 	"github.com/mojoboss/bookstore_users-api/datasources/postgres/users_db"
-	"github.com/mojoboss/bookstore_users-api/utils/date_utils"
 	"github.com/mojoboss/bookstore_users-api/utils/errors"
+	"log"
 )
 
 var (
@@ -28,14 +28,20 @@ func (user *User) Get() *errors.RestErr {
 }
 
 func (user *User) Save() *errors.RestErr {
-	current := userDB[user.Id]
-	if current != nil {
-		if current.Email == user.Email {
-			return errors.NewBadRequestError(fmt.Sprintf("email %s already registered", user.Email))
-		}
-		return errors.NewBadRequestError(fmt.Sprintf("user %d already exists", user.Id))
+	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.insert_user($1, $2, $3)")
+	if err != nil {
+		log.Println("Error in db prepare for save user", err)
+		return errors.NewInternalServerError("Server error")
 	}
-	user.DateCreated = date_utils.GetNowString()
-	userDB[user.Id] = user
+	defer stmt.Close()
+	_, err = stmt.Exec(user.Firstname, user.LastName, user.Email)
+	if err != nil {
+		log.Println("Error in db exec for save user", err)
+		return errors.NewInternalServerError("Server error")
+	}
+	if err != nil {
+		log.Println("Error in getting last insert id for save user", err)
+		return errors.NewInternalServerError("Server error")
+	}
 	return nil
 }
