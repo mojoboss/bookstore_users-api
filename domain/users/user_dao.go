@@ -5,6 +5,11 @@ import (
 	"github.com/mojoboss/bookstore_users-api/datasources/postgres/users_db"
 	"github.com/mojoboss/bookstore_users-api/utils/errors"
 	"log"
+	"strings"
+)
+
+const (
+	DUPLICATE_INDEX_KEY = "users_email_key"
 )
 
 var (
@@ -37,6 +42,9 @@ func (user *User) Save() *errors.RestErr {
 	_, err = stmt.Exec(user.Firstname, user.LastName, user.Email)
 	if err != nil {
 		log.Println("Error in db exec for save user", err)
+		if strings.Contains(err.Error(), DUPLICATE_INDEX_KEY) {
+			return errors.NewBadRequestError(fmt.Sprintf("Email %s already exists", user.Email))
+		}
 		return errors.NewInternalServerError("Server error")
 	}
 	if err != nil {
