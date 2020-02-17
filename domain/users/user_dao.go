@@ -6,6 +6,7 @@ import (
 	"github.com/mojoboss/bookstore_users-api/utils/errors"
 	"log"
 	"strings"
+	"time"
 )
 
 const (
@@ -17,18 +18,23 @@ var (
 )
 
 func (user *User) Get() *errors.RestErr {
-	if err := users_db.Client.Ping(); err != nil {
-		panic(err)
+	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.get_user($1)")
+	if err != nil {
+		log.Println("Error in db prepare for get user", err)
+		return errors.NewInternalServerError("Server error")
 	}
-	result := userDB[user.Id]
-	if result == nil {
-		return errors.NewNotFoundError(fmt.Sprintf("user &d not found", user.Id))
+	defer stmt.Close()
+	var firstName, lastName, email string
+	var creationTime time.Time
+	err = stmt.QueryRow(user.Id).Scan(&firstName, &lastName, &email, &creationTime)
+	if err != nil {
+		log.Println("Error in scanning get user", err)
+		return errors.NewInternalServerError("Server error")
 	}
-	user.Id = result.Id
-	user.Firstname = result.Firstname
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.DateCreated = result.DateCreated
+	user.Firstname = firstName
+	user.LastName = lastName
+	user.Email = email
+	user.DateCreated = creationTime.String()
 	return nil
 }
 
