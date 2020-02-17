@@ -11,6 +11,7 @@ import (
 
 const (
 	DUPLICATE_INDEX_KEY = "users_email_key"
+	USER_NOT_FOUND_KEY  = "converting NULL to string is unsupported"
 )
 
 var (
@@ -29,6 +30,9 @@ func (user *User) Get() *errors.RestErr {
 	err = stmt.QueryRow(user.Id).Scan(&firstName, &lastName, &email, &creationTime)
 	if err != nil {
 		log.Println("Error in scanning get user", err)
+		if strings.Contains(err.Error(), USER_NOT_FOUND_KEY) {
+			return errors.NewBadRequestError(fmt.Sprintf("UserID %d not found", user.Id))
+		}
 		return errors.NewInternalServerError("Server error")
 	}
 	user.Firstname = firstName
