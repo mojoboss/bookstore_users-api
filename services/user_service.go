@@ -22,3 +22,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	}
 	return &user, nil
 }
+
+func UpdateUser(user users.User) (*users.User, *errors.RestErr) {
+	return &user, nil
+}
