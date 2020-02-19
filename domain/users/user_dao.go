@@ -43,3 +43,18 @@ func (user *User) Save() *errors.RestErr {
 	}
 	return nil
 }
+
+func (user *User) Update() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.update_user($1, $2, $3, $4)")
+	if err != nil {
+		log.Println("Error in db prepare for save user", err)
+		return postgres_utils.HandlePQError(err)
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(user.Id, user.Firstname, user.LastName, user.Email)
+	if err != nil {
+		log.Println("Error in db exec for save user", err)
+		return postgres_utils.HandlePQError(err)
+	}
+	return nil
+}
