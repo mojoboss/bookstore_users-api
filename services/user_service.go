@@ -28,6 +28,9 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 	if err != nil {
 		return nil, err
 	}
+	if err := user.Validate(); err != nil {
+		return nil, err
+	}
 	if isPartial {
 		if user.Firstname != "" {
 			current.Firstname = user.Firstname

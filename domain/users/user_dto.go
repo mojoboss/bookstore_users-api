@@ -14,6 +14,8 @@ type User struct {
 }
 
 func (user *User) Validate() *errors.RestErr {
+	user.Firstname = strings.TrimSpace(user.Firstname)
+	user.LastName = strings.TrimSpace(user.LastName)
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	if user.Email == "" {
 		return errors.NewBadRequestError("invalid email address")
