@@ -58,3 +58,18 @@ func (user *User) Update() *errors.RestErr {
 	}
 	return nil
 }
+
+func (user *User) Delete() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.delete_user($1)")
+	if err != nil {
+		log.Println("Error in db prepare for delete user", err)
+		return postgres_utils.HandlePQError(err)
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(user.Id)
+	if err != nil {
+		log.Println("Error in db exec for delete user", err)
+		return postgres_utils.HandlePQError(err)
+	}
+	return nil
+}
