@@ -17,6 +17,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+	user.Status = users.STATUS_ACTIVE
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -52,10 +53,18 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 		if user.Email != "" {
 			current.Email = user.Email
 		}
+		if user.Status != "" {
+			current.Status = user.Status
+		}
+		if user.Password != "" {
+			current.Password = user.Password
+		}
 	} else {
 		current.Firstname = user.Firstname
 		current.LastName = user.LastName
 		current.Email = user.Email
+		current.Status = user.Status
+		current.Password = user.Password
 	}
 	if err = current.Update(); err != nil {
 		return nil, err

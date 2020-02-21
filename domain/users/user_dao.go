@@ -15,9 +15,9 @@ func (user *User) Get() *errors.RestErr {
 		return postgres_utils.HandlePQError(err)
 	}
 	defer stmt.Close()
-	var firstName, lastName, email string
+	var firstName, lastName, email, status, password string
 	var creationTime time.Time
-	err = stmt.QueryRow(user.Id).Scan(&firstName, &lastName, &email, &creationTime)
+	err = stmt.QueryRow(user.Id).Scan(&firstName, &lastName, &email, &status, &password, &creationTime)
 	if err != nil {
 		log.Println("Error in scanning get user", err)
 		return postgres_utils.HandlePQError(err)
@@ -25,18 +25,20 @@ func (user *User) Get() *errors.RestErr {
 	user.Firstname = firstName
 	user.LastName = lastName
 	user.Email = email
+	user.Status = status
+	user.Password = password
 	user.DateCreated = creationTime.String()
 	return nil
 }
 
 func (user *User) Save() *errors.RestErr {
-	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.insert_user($1, $2, $3)")
+	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.insert_user($1, $2, $3, $4, $5)")
 	if err != nil {
 		log.Println("Error in db prepare for save user", err)
 		return postgres_utils.HandlePQError(err)
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(user.Firstname, user.LastName, user.Email)
+	_, err = stmt.Exec(user.Firstname, user.LastName, user.Email, user.Status, user.Password)
 	if err != nil {
 		log.Println("Error in db exec for save user", err)
 		return postgres_utils.HandlePQError(err)
@@ -45,13 +47,13 @@ func (user *User) Save() *errors.RestErr {
 }
 
 func (user *User) Update() *errors.RestErr {
-	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.update_user($1, $2, $3, $4)")
+	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.update_user($1, $2, $3, $4, $5, $6)")
 	if err != nil {
 		log.Println("Error in db prepare for save user", err)
 		return postgres_utils.HandlePQError(err)
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(user.Id, user.Firstname, user.LastName, user.Email)
+	_, err = stmt.Exec(user.Id, user.Firstname, user.LastName, user.Email, user.Status, user.Password)
 	if err != nil {
 		log.Println("Error in db exec for save user", err)
 		return postgres_utils.HandlePQError(err)
