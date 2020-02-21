@@ -61,6 +61,31 @@ func (user *User) Update() *errors.RestErr {
 	return nil
 }
 
+func (user *User) Search(status string) ([]User, *errors.RestErr) {
+	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.search_user($1)")
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(status)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer rows.Close()
+	users := make([]User, 0)
+	for rows.Next() {
+		var usr User
+		if err := rows.Scan(&usr.Id, &usr.Firstname, &usr.LastName, &usr.Email, &usr.Status, &usr.DateCreated); err != nil {
+			return nil, postgres_utils.HandlePQError(err)
+		}
+		users = append(users, usr)
+	}
+	if len(users) == 0 {
+		return nil, errors.NewNotFoundError("No users found for the status")
+	}
+	return users, nil
+}
+
 func (user *User) Delete() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.delete_user($1)")
 	if err != nil {

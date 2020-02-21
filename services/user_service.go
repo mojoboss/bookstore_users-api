@@ -24,6 +24,11 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
+func SearchUser(status string) ([]users.User, *errors.RestErr) {
+	var user users.User
+	return user.Search(status)
+}
+
 func DeleteUser(userid int64) *errors.RestErr {
 	user, err := GetUser(userid)
 	if err != nil {

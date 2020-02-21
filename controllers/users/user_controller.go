@@ -78,5 +78,10 @@ func UpdateUser(c *gin.Context) {
 }
 
 func SearchUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "later")
+	status := c.Query("status")
+	users, err := services.SearchUser(status)
+	if err != nil {
+		c.JSON(err.Status, err)
+	}
+	c.JSON(http.StatusOK, users)
 }
