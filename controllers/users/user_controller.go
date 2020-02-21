@@ -31,12 +31,12 @@ func DeleteUser(c *gin.Context) {
 		c.JSON(err.Status, err)
 		return
 	}
-	user, getErr := services.DeleteUser(userId)
+	getErr := services.DeleteUser(userId)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }
 
 func GetUser(c *gin.Context) {

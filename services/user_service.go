@@ -23,15 +23,15 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
-func DeleteUser(userid int64) (*users.User, *errors.RestErr) {
+func DeleteUser(userid int64) *errors.RestErr {
 	user, err := GetUser(userid)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if err := user.Delete(); err != nil {
-		return nil, err
+		return err
 	}
-	return user, nil
+	return nil
 }
 
 func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
