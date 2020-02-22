@@ -26,7 +26,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
-func SearchUser(status string) ([]users.User, *errors.RestErr) {
+func SearchUser(status string) (users.Users, *errors.RestErr) {
 	var user users.User
 	return user.Search(status)
 }
