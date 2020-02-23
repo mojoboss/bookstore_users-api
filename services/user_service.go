@@ -6,7 +6,21 @@ import (
 	"github.com/mojoboss/bookstore_users-api/utils/errors"
 )
 
-func GetUser(userId int64) (user *users.User, err *errors.RestErr) {
+var (
+	UserService IUserService = &userService{}
+)
+
+type IUserService interface {
+	GetUser(int64) (*users.User, *errors.RestErr)
+	CreateUser(users.User) (*users.User, *errors.RestErr)
+	SearchUser(string) (users.Users, *errors.RestErr)
+	DeleteUser(int64) *errors.RestErr
+	UpdateUser(bool, users.User) (*users.User, *errors.RestErr)
+}
+
+type userService struct{}
+
+func (service *userService) GetUser(userId int64) (user *users.User, err *errors.RestErr) {
 	result := users.User{Id: userId}
 	if err := result.Get(); err != nil {
 		return nil, err
@@ -14,7 +28,7 @@ func GetUser(userId int64) (user *users.User, err *errors.RestErr) {
 	return &result, nil
 }
 
-func CreateUser(user users.User) (*users.User, *errors.RestErr) {
+func (service *userService) CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -26,13 +40,13 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
-func SearchUser(status string) (users.Users, *errors.RestErr) {
+func (service *userService) SearchUser(status string) (users.Users, *errors.RestErr) {
 	var user users.User
 	return user.Search(status)
 }
 
-func DeleteUser(userid int64) *errors.RestErr {
-	user, err := GetUser(userid)
+func (service *userService) DeleteUser(userid int64) *errors.RestErr {
+	user, err := service.GetUser(userid)
 	if err != nil {
 		return err
 	}
@@ -42,8 +56,8 @@ func DeleteUser(userid int64) *errors.RestErr {
 	return nil
 }
 
-func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
-	current, err := GetUser(user.Id)
+func (service *userService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
+	current, err := service.GetUser(user.Id)
 	if err != nil {
 		return nil, err
 	}
