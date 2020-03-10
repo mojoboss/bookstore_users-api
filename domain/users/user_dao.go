@@ -1,6 +1,7 @@
 package users
 
 import (
+	"database/sql"
 	"github.com/mojoboss/bookstore_users-api/datasources/postgres/users_db"
 	"github.com/mojoboss/bookstore_users-api/logger"
 	"github.com/mojoboss/bookstore_users-api/utils/errors"
@@ -113,6 +114,10 @@ func (user *User) FindByEmailPassword() (*User, *errors.RestErr) {
 	var userResult User
 	err = stmt.QueryRow(user.Email, user.Password).Scan(&userResult.Id, &userResult.Firstname, &userResult.LastName, &userResult.Email, &userResult.Status, &userResult.DateCreated)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			logger.Error("Error in db exec for FindByEmailPassword rows not found", err)
+			return nil, errors.NewNotFoundError("email password error")
+		}
 		logger.Error("Error in db exec for FindByEmailPassword", err)
 		return nil, errors.NewInternalServerError("database error")
 	}
