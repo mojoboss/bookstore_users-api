@@ -102,3 +102,19 @@ func (user *User) Delete() *errors.RestErr {
 	}
 	return nil
 }
+
+func (user *User) FindByEmailPassword() (*User, *errors.RestErr) {
+	stmt, err := users_db.Client.Prepare("SELECT * FROM users_db.getuserfromemailandpassword($1, $2)")
+	if err != nil {
+		logger.Error("Error in db prepare for FindByEmailPassword", err)
+		return nil, errors.NewInternalServerError("database error")
+	}
+	defer stmt.Close()
+	var userResult User
+	err = stmt.QueryRow(user.Email, user.Password).Scan(&userResult.Id, &userResult.Firstname, &userResult.LastName, &userResult.Email, &userResult.Status, &userResult.DateCreated)
+	if err != nil {
+		logger.Error("Error in db exec for FindByEmailPassword", err)
+		return nil, errors.NewInternalServerError("database error")
+	}
+	return &userResult, nil
+}

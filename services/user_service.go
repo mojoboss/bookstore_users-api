@@ -16,6 +16,7 @@ type IUserService interface {
 	SearchUser(string) (users.Users, *errors.RestErr)
 	DeleteUser(int64) *errors.RestErr
 	UpdateUser(bool, users.User) (*users.User, *errors.RestErr)
+	FindUserByEmailPassword(users.User) (*users.User, *errors.RestErr)
 }
 
 type userService struct{}
@@ -91,4 +92,8 @@ func (service *userService) UpdateUser(isPartial bool, user users.User) (*users.
 		return nil, err
 	}
 	return current, nil
+}
+
+func (service *userService) FindUserByEmailPassword(user users.User) (*users.User, *errors.RestErr) {
+	return user.FindByEmailPassword()
 }
