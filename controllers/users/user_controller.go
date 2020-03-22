@@ -2,7 +2,9 @@ package users
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mojoboss/bookstore_oauth-go/oauth"
 	"github.com/mojoboss/bookstore_users-api/domain/users"
+	"github.com/mojoboss/bookstore_users-api/logger"
 	"github.com/mojoboss/bookstore_users-api/services"
 	"github.com/mojoboss/bookstore_users-api/utils/errors"
 	"net/http"
@@ -40,6 +42,11 @@ func DeleteUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
 	userId, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if userErr != nil {
 		err := errors.NewBadRequestError("user id should be a number")
@@ -51,7 +58,12 @@ func GetUser(c *gin.Context) {
 		c.JSON(getErr.Status, getErr)
 		return
 	}
-	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
+	if oauth.GetCallerId(c.Request) == user.Id {
+		logger.Info("Private request")
+		c.JSON(http.StatusOK, user.Marshall(false))
+		return
+	}
+	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func UpdateUser(c *gin.Context) {
